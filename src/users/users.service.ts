@@ -1,40 +1,103 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
+import { HashService } from 'src/hash/hash.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Wish)
-    private readonly wishRepository: Repository<Wish>,
+    private userRepository: Repository<User>,
+    private hashService: HashService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.userRepository.create(createUserDto);
-    return await this.userRepository.save(user);
+  // async create(createUserDto: CreateUserDto): Promise<User> {
+  //   const user = this.userRepository.create(createUserDto);
+  //   return await this.userRepository.save(user);
+  // }
+
+  async create(createUserDto: CreateUserDto) {
+    const { username, email, password } = createUserDto;
+
+    const existingUser = await this.userRepository.findOne({
+      where: [{ username }, { email }],
+    });
+    if (existingUser) {
+      throw new ConflictException('This user already exist');
+    }
+    const hashedPassword = await this.hashService.getHash(password);
+    const user = await this.userRepository.save({
+      ...createUserDto,
+      password: hashedPassword,
+    });
+    return user;
   }
 
   async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
-    const user = await this.userRepository.findOneBy({ id });
+  async findOne(query: string) {
+    const user = await this.userRepository.findOne({
+      where: { username: query },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
     return user;
   }
 
-  async updateOne(id: number, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(id);
-    return this.userRepository.save({ ...user, ...updateUserDto });
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    const { username, password, email } = updateUserDto;
+
+    const existingUser = await this.userRepository.findOne({
+      where: [{ username }, { email }],
+    });
+    if (existingUser) {
+      throw new ConflictException('This user already exist');
+    }
+    if (password) {
+      updateUserDto.password = await this.hashService.getHash(password);
+    }
+    await this.userRepository.update(id, updateUserDto);
+    return await this.findById(id);
   }
+
+  // async findOne(id: number): Promise<User> {
+  //   const user = await this.userRepository.findOneBy({ id });
+  //   return user;
+  // }
+
+  // async updateOne(id: number, updateUserDto: UpdateUserDto) {
+  //   const user = await this.findOne(id);
+  //   return this.userRepository.save({ ...user, ...updateUserDto });
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async findByUserName(username: string): Promise<User> {
+    const user = await this.userRepository.findOneBy({ username });
+    if (!user) {
+      throw new NotFoundException('Такого пользователя нет');
+    }
+    return user;
+  }
+
+  async findById(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }

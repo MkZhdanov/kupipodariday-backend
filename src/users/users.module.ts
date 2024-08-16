@@ -4,9 +4,10 @@ import { UsersController } from './users.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
+import { HashModule } from 'src/hash/hash.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Wish])],
+  imports: [TypeOrmModule.forFeature([User]), HashModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],
