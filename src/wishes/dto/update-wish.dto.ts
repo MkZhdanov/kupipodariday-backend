@@ -1,4 +1,4 @@
-import { PartialType } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/mapped-types';
 import { CreateWishDto } from './create-wish.dto';
 import { IsNumber, IsOptional, Min } from 'class-validator';
 

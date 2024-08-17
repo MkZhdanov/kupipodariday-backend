@@ -102,6 +102,8 @@ export class WishesService {
   }
 
   async copy(wishId: number, user: User) {
+    console.log(wishId);
+    console.log(user);
     const wish = await this.wishRepository.findOne({
       where: { id: wishId },
       relations: ['owner'],
@@ -109,7 +111,7 @@ export class WishesService {
     if (!wish) {
       throw new NotFoundException('Wish not found');
     }
-    if (wish.owner.id !== user.id) {
+    if (wish.owner.id === user.id) {
       throw new BadRequestException('Uncorrecly request');
     }
 
