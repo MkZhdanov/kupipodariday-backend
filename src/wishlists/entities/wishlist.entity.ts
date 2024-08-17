@@ -1,34 +1,19 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  ManyToMany,
-  JoinTable,
-} from 'typeorm';
-import { Length, IsUrl } from 'class-validator';
+import { Entity, Column, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import { BaseEntity } from '../../utils/entities/base.entities';
+import { IsString, Length, IsUrl, Max } from 'class-validator';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { User } from 'src/users/entities/user.entity';
 
 @Entity()
-export class Wishlist {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
+export class Wishlist extends BaseEntity {
   @Column()
   @Length(1, 250)
+  @IsString()
   name: string;
 
   @Column({ default: '' })
-  @Length(0, 1500)
+  @IsString()
+  @Max(1500)
   description: string;
 
   @Column()

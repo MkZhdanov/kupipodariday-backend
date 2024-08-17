@@ -102,8 +102,6 @@ export class WishesService {
   }
 
   async copy(wishId: number, user: User) {
-    console.log(wishId);
-    console.log(user);
     const wish = await this.wishRepository.findOne({
       where: { id: wishId },
       relations: ['owner'],
