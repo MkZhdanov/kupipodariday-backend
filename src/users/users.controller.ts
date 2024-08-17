@@ -32,16 +32,6 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  // @Get(':id')
-  // findOne(@Param('id') id: string) {
-  //   return this.usersService.findOne(+id);
-  // }
-
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-  //   return this.usersService.update(+id, updateUserDto);
-  // }
-
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
@@ -66,5 +56,15 @@ export class UsersController {
   @Post('find')
   findMany(@Body() findUserDto: FindUserDto) {
     return this.usersService.findMany(findUserDto);
+  }
+
+  @Get('me/wishes')
+  getOwnWishes(@AuthUserId() id: number) {
+    return this.usersService.findOwnWishes(id);
+  }
+
+  @Get(':username/wishes')
+  getUserWishes(@Param('username') username: string) {
+    return this.usersService.findWishes(username);
   }
 }

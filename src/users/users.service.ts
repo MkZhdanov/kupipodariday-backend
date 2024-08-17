@@ -21,11 +21,6 @@ export class UsersService {
     private hashService: HashService,
   ) {}
 
-  // async create(createUserDto: CreateUserDto): Promise<User> {
-  //   const user = this.userRepository.create(createUserDto);
-  //   return await this.userRepository.save(user);
-  // }
-
   async create(createUserDto: CreateUserDto) {
     const { username, email, password } = createUserDto;
 
@@ -88,16 +83,6 @@ export class UsersService {
     }
   }
 
-  // async findOne(id: number): Promise<User> {
-  //   const user = await this.userRepository.findOneBy({ id });
-  //   return user;
-  // }
-
-  // async updateOne(id: number, updateUserDto: UpdateUserDto) {
-  //   const user = await this.findOne(id);
-  //   return this.userRepository.save({ ...user, ...updateUserDto });
-  // }
-
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
@@ -127,5 +112,35 @@ export class UsersService {
         ],
       }) || []
     );
+  }
+
+  async findOwnWishes(id: number): Promise<Array<Wish>> {
+    const userWishes = await this.userRepository.findOne({
+      where: { id },
+      relations: [
+        'wishes',
+        'wishes.owner',
+        'wishes.offers',
+        'wishes.offers.user',
+      ],
+    });
+    return userWishes.wishes || [];
+  }
+
+  async findWishes(username: string): Promise<Wish[]> {
+    const user = await this.userRepository.findOne({
+      where: { username },
+      relations: [
+        'wishes',
+        'wishes.offers',
+        'wishes.offers.user',
+        'wishes.offers.item',
+        'wishes.offers.item.owner',
+      ],
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user.wishes || [];
   }
 }
