@@ -6,13 +6,11 @@ import {
   Patch,
   Param,
   Delete,
-  UseFilters,
   UseGuards,
 } from '@nestjs/common';
 import { WishlistsService } from './wishlists.service';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
-import { InvalidExceptionFilter } from 'src/filters/invalid-data-exception.filters';
 import { AuthUser, AuthUserId } from 'src/utils/decorators/user.decorator';
 import { User } from 'src/users/entities/user.entity';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';

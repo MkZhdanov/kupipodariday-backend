@@ -75,13 +75,10 @@ export class WishlistsService {
   }
 
   async remove(id: number, wishListId: number) {
-    console.log(id);
-    console.log(wishListId);
     const wishlist = await this.wishlistRepository.findOne({
       where: { id },
       relations: ['owner', 'items'],
     });
-    console.log(wishlist);
     if (wishlist.owner.id !== wishListId) {
       throw new BadRequestException('You are not the owner of the wishlist');
     }

@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, ManyToMany, OneToMany } from 'typeorm';
+import { Entity, Column, ManyToOne, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../utils/entities/base.entities';
 import { IsString, Length, IsUrl, IsNumber, IsInt, Min } from 'class-validator';
 import { User } from 'src/users/entities/user.entity';
