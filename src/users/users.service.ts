@@ -2,11 +2,13 @@ import {
   Injectable,
   NotFoundException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FindUserDto } from './dto/find-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, QueryFailedError, Like } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Wish } from 'src/wishes/entities/wish.entity';
 import { HashService } from 'src/hash/hash.service';
@@ -71,6 +73,21 @@ export class UsersService {
     return await this.findById(id);
   }
 
+  async updateOne(id: number, updateUserDto: UpdateUserDto) {
+    const { password } = updateUserDto;
+    const user = await this.findById(id);
+    if (password) {
+      updateUserDto.password = await this.hashService.getHash(password);
+    }
+    try {
+      return this.userRepository.save({ ...user, ...updateUserDto });
+    } catch (err) {
+      if (err instanceof QueryFailedError) {
+        throw new BadRequestException('Такой пользователь уже зарегистрирован');
+      }
+    }
+  }
+
   // async findOne(id: number): Promise<User> {
   //   const user = await this.userRepository.findOneBy({ id });
   //   return user;
@@ -99,5 +116,16 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
     return user;
+  }
+
+  findMany(query: FindUserDto) {
+    return (
+      this.userRepository.find({
+        where: [
+          { username: Like(`%${query.query}%`) },
+          { email: Like(`%${query.query}%`) },
+        ],
+      }) || []
+    );
   }
 }
